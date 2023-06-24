@@ -33,7 +33,7 @@ type Indentifier struct {
     Value string
 }
 
-func (i *Indentifier) expressionNode()
+func (i *Indentifier) expressionNode() {}
 func (i *Indentifier) TokenLiteral() string {return i.Token.Literal}
 
 type LetStatemet struct {
@@ -42,6 +42,6 @@ type LetStatemet struct {
     Value Expression
 }
 
-func (ls *LetStatemet) statementNode()
+func (ls *LetStatemet) statementNode() {}
 func (ls *LetStatemet) TokenLiteral() string {return ls.Token.Literal}
 
