@@ -82,6 +82,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatemet {
 
 func (p *Parser) expectPeek(t token.TokenType) bool {
     if p.peekToken.Type != t {
+        p.peekError(t)
         return false
     }
     p.nextToken()
@@ -91,7 +92,7 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 
 func (p *Parser) peekError(t token.TokenType) {
     msg := fmt.Sprintf(
-        "expected next token to be %s go %s instead", 
+        "expected next token to be %s got %s instead", 
         t,
         p.peekToken.Type,
     ) 
