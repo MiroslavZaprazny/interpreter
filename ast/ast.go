@@ -29,7 +29,7 @@ func (p *Program) TokenLiteral() string {
 }
 
 type Indentifier struct {
-    Token token.Token
+    Token token.Token //IDENT
     Value string
 }
 
@@ -37,7 +37,7 @@ func (i *Indentifier) expressionNode() {}
 func (i *Indentifier) TokenLiteral() string {return i.Token.Literal}
 
 type LetStatemet struct {
-    Token token.Token
+    Token token.Token //LET
     Name *Indentifier
     Value Expression
 }
@@ -45,3 +45,11 @@ type LetStatemet struct {
 func (ls *LetStatemet) statementNode() {}
 func (ls *LetStatemet) TokenLiteral() string {return ls.Token.Literal}
 
+
+type ReturnStatement struct {
+    Token token.Token //RETURN
+    ReturnValue Expression
+}
+
+func (rs *ReturnStatement) statementNode() {}
+func (rs *ReturnStatement) TokenLiteral() string {return rs.Token.Literal}
