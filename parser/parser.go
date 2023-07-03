@@ -12,7 +12,14 @@ type Parser struct {
     curToken token.Token
     peekToken token.Token
     errors []string
+    prefixParserFns map[token.TokenType]prefixParserFn
+    infixParserFns map[token.TokenType]infixParserFn
 }
+
+type (
+    prefixParserFn func() ast.Expression
+    infixParserFn func(ast.Expression) ast.Expression
+)
 
 func New(l *lexer.Lexer) *Parser {
     p := &Parser{
@@ -111,4 +118,12 @@ func (p *Parser) peekError(t token.TokenType) {
     ) 
 
     p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParserFn) {
+    p.prefixParserFns[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParserFn) {
+    p.infixParserFns[tokenType] = fn
 }
