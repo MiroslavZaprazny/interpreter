@@ -377,7 +377,16 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
             t.Errorf("expected=%q, got=%q", tt.expected, actual)
         }
     }
+}
 
+func TestIfExpression(t *testing.T) {
+    input := `if (x < y) { x }`
+    l := lexer.New(input)
+    p := New(l)
+    program := p.ParseProgram()
+    checkParserErrors()
+
+    if len(program.Statements) != 1 {}
 }
 
 func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
