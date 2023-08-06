@@ -384,9 +384,47 @@ func TestIfExpression(t *testing.T) {
     l := lexer.New(input)
     p := New(l)
     program := p.ParseProgram()
-    checkParserErrors()
+    checkParserErrors(t, p)
 
-    if len(program.Statements) != 1 {}
+    if len(program.Statements) != 1 {
+        t.Fatalf(
+            "program.Body does not contain %d statements, got=%d",
+            1, 
+            len(program.Statements),
+        )
+    }
+
+    stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+    if !ok {
+        t.Fatalf("statement is not ast.ExpressionStatement got=%T", program.Statements[0])
+    }
+
+    exp, ok := stmt.Expression.(*ast.IfExpression)
+    if !ok {
+        t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T",
+        stmt.Expression)
+    }
+
+    if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+        return
+    }
+
+    if len(exp.Consequence.Statements) != 1 {
+        t.Errorf("consequence is not 1 statements. got=%d\n",
+            len(exp.Consequence.Statements))
+    }
+
+    consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+    if !ok {
+        t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+        exp.Consequence.Statements[0])
+    }
+    if !testIdentifier(t, consequence.Expression, "x") {
+        return
+    }
+    if exp.Alternative != nil {
+        t.Errorf("exp.Alternative.Statements was not nil. got=%+v", exp.Alternative)
+    }
 }
 
 func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
