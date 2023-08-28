@@ -96,6 +96,31 @@ func TestReturnStatements(t *testing.T) {
     }
 }
 
+func TestErrorHandling(t *testing.T) {
+    tests := []struct {
+        input string
+        expectedError string
+    } {
+        {"5 + true;", "type mismatch: INTEGER + BOOLEAN"},
+        {"5 + true; 5;", "type mismatch: INTEGER + BOOLEAN"},
+        {"-true;", "unknown operator: -BOOLEAN"},
+        {"true + true;", "unknown operator: BOOLEAN + BOOLEAN"},
+        {"5; false + true;", "unknown operator: BOOLEAN + BOOLEAN"},
+    }
+
+    for _, tt := range tests {
+        evaluated :=  testEval(tt.input)
+        errorObj, ok := evaluated.(*object.Error)
+        if !ok {
+            t.Errorf("no error object returned got %T", evaluated)
+        }
+
+        if errorObj.Message != tt.expectedError {
+            t.Errorf("Expected error=%q got=%q", tt.expectedError, errorObj.Message)
+        }
+    }
+}
+
 func testIfElseExpression(t *testing.T) {
     tests := []struct {
         input string
@@ -112,9 +137,9 @@ func testIfElseExpression(t *testing.T) {
 
     for _, tt := range tests {
         evaluated := testEval(tt.input)
-        interger, ok := tt.expected.(int)
+        integer, ok := tt.expected.(int)
         if ok {
-            testIntegerObject(t, evaluated, int64(interger))
+            testIntegerObject(t, evaluated, int64(integer))
         } else {
             testNullObject(t, evaluated)
         }
@@ -157,7 +182,7 @@ func testIntegerObject(t *testing.T, input object.Object, expected int64) bool {
     result, ok := input.(*object.Integer)
 
     if !ok {
-        t.Errorf("Expected interger object got %T (%+v)", input, input)
+        t.Errorf("Expected integer object got %T (%+v)", input, input)
         return false;
     }
 
