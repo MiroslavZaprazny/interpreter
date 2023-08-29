@@ -1,4 +1,5 @@
 package evaluator
+
 import (
 	"interpreter/lexer"
 	"interpreter/object"
@@ -96,6 +97,21 @@ func TestReturnStatements(t *testing.T) {
     }
 }
 
+func testLetStatements(t *testing.T) {
+    tests := []struct {
+        input string
+        expected int64
+    }{
+        {"let a = 5;", 5},
+        {"let a = 5 * 5;", 25},
+        {"let a = 5 + 5;", 10},
+    }
+
+    for _, tt := range tests {
+        testIntegerObject(t, testEval(tt.input), tt.expected)
+    }
+}
+
 func TestErrorHandling(t *testing.T) {
     tests := []struct {
         input string
@@ -106,6 +122,7 @@ func TestErrorHandling(t *testing.T) {
         {"-true;", "unknown operator: -BOOLEAN"},
         {"true + true;", "unknown operator: BOOLEAN + BOOLEAN"},
         {"5; false + true;", "unknown operator: BOOLEAN + BOOLEAN"},
+        {"foobar", "identifier not found: foobar"},
     }
 
     for _, tt := range tests {
@@ -149,8 +166,9 @@ func testIfElseExpression(t *testing.T) {
 func testEval(input string) object.Object {
     l := lexer.New(input)
     p := parser.New(l)
+    env := object.NewEnviroment()
 
-    return Eval(p.ParseProgram())
+    return Eval(p.ParseProgram(), env)
 }
 
 func testNullObject(t *testing.T, object object.Object) bool {
