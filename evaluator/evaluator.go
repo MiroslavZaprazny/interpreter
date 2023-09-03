@@ -56,6 +56,19 @@ func Eval(node ast.Node, env *object.Enviroment) object.Object {
             env.Set(node.Name.Value, val)
         case *ast.Indentifier:
             return evalIdentifier(node, env)
+        case *ast.FunctionLiteral:
+            return &object.Function{Parameters: node.Parameters, Env: env, Body: node.Body}
+        case *ast.CallExpression:
+            function := Eval(node.Function, env)
+            if isError(function) {
+                return function
+            }
+            args := evalExpressions(node.Arguments, env)
+
+            if len(args) == 1 && isError(args[0]) {
+                return args[0]
+            }
+            return applyFunction(function, args)
     }
 
     return nil
@@ -119,6 +132,20 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
         default:
             return newError("unknown operator: %s%s", operator, right.Type())
     }
+}
+
+func evalExpressions(exps []ast.Expression, env *object.Enviroment) []object.Object {
+    var result []object.Object
+
+    for _, e := range exps {
+        evaluated := Eval(e, env)
+        if isError(evaluated) {
+            return []object.Object{evaluated}
+        }
+        result = append(result, evaluated)
+    }
+
+    return result
 }
 
 func evalBlockStatement(block *ast.BlockStatement, env *object.Enviroment) object.Object {
@@ -208,6 +235,35 @@ func evalIdentifier(node *ast.Indentifier, env *object.Enviroment) object.Object
     }
 
     return val
+}
+
+func applyFunction(fn object.Object, args []object.Object) object.Object {
+    function, ok := fn.(*object.Function)
+    if !ok {
+        return newError("not a function %s", fn.Type())
+    }
+    extentedEnv := extentedFunctionEnv(function, args)
+    evaluated := Eval(function.Body, extentedEnv)
+
+    return unwrapReturnValue(evaluated)
+}
+
+func extentedFunctionEnv(fn *object.Function, args []object.Object) *object.Enviroment {
+    env := object.NewEnclosedEnviorment(fn.Env)
+
+    for paramIdx, param := range fn.Parameters {
+        env.Set(param.Value, args[paramIdx])
+    }
+
+    return env
+}
+
+func unwrapReturnValue(obj object.Object) object.Object {
+    if returnValue, ok := obj.(*object.RetrunValue); ok {
+        return returnValue
+    }
+
+    return obj
 }
 
 func newError(format string, a ...interface{}) *object.Error {

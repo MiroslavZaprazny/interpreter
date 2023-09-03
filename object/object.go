@@ -1,6 +1,11 @@
 package object
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"interpreter/ast"
+	"strings"
+)
 
 type ObjectType string
 
@@ -10,6 +15,7 @@ const (
     NULL_OBJ = "NULL"
     RETURN_VALUE_OBJ = "RETURN_VALUE"
     ERRROR_OBJ = "ERROR"
+    FUNCTION_OBJ = "FUNCTION"
 )
 
 type Object interface {
@@ -61,6 +67,33 @@ func (rv *RetrunValue) Inspect() string {
 
 func (rv *RetrunValue) Type() ObjectType {
     return RETURN_VALUE_OBJ
+}
+
+type Function struct {
+    Parameters []*ast.Indentifier
+    Body *ast.BlockStatement
+    Env *Enviroment
+}
+
+func (f *Function) Inspect() string {
+    var out bytes.Buffer
+    var params []string
+
+    for _, p := range f.Parameters {
+        params = append(params, p.String())
+    }
+
+    out.WriteString("fn(")
+    out.WriteString(strings.Join(params, ", "))
+    out.WriteString(") {\n")
+    out.WriteString(f.Body.String())
+    out.WriteString("\n}")
+
+    return out.String()
+}
+
+func (f *Function) Type() ObjectType {
+    return FUNCTION_OBJ
 }
 
 type Error struct {
