@@ -24,6 +24,9 @@ func (l *Lexer) NextToken() token.Token {
     l.skipWhitespace()
 
     switch l.ch {
+    case '"':
+        tok.Type = token.STRING
+        tok.Literal = l.readString()
     case '=':
         if l.peekChar() == '=' {
             ch := l.ch
@@ -125,6 +128,17 @@ func (l* Lexer) readNumber() string {
     }
 
     return l.input[position: l.position]
+}
+
+func (l *Lexer) readString() string {
+    position := l.position + 1
+    for {
+        l.readChar()
+        if l.ch == '"' || l.ch == 0 {
+            break
+        }
+    }
+    return l.input[position:l.position]
 }
 
 func isLetter(ch byte) bool {
