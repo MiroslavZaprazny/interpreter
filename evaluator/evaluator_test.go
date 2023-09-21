@@ -180,6 +180,19 @@ func TestErrorHandling(t *testing.T) {
     }
 }
 
+func TestStringLiteral(t *testing.T) {
+    input := `"Hello world"`
+    evaluated := testEval(input)
+    str, ok := evaluated.(*object.String)
+    if !ok {
+        t.Fatalf("object is not string got %T", str)
+    }
+
+    if str.Value != "Hello world" {
+        t.Errorf("String has wrong value got %q", str.Value)
+    }
+}
+
 func testIfElseExpression(t *testing.T) {
     tests := []struct {
         input string
